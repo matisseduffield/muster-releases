@@ -1,0 +1,11 @@
+{
+  "versionCode": 10401,
+  "versionName": "1.4.1",
+  "apk": "https://raw.githubusercontent.com/matisseduffield/muster-releases/main/Muster-v1.4.1.apk",
+  "size": 307242,
+  "sha256": "9bf70855b0a87b8ab0be371a3f35820fe5a8e0dbd118529c8a304254ef49babc",
+  "publishedAt": "2026-11-13T10:16:29Z",
+  "notes": [
+    "Delete on an event has moved to the bottom of its card, away from the title"
+  ]
+}

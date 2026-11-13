@@ -1,0 +1,1317 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<!-- A group link is /g/<id> and a code's is /j/<code>, but the files sit at the top: without this, lib.js and the fonts would be looked for under /g/. -->
+<script>if (/^\/[gj]\//.test(location.pathname)) document.write('<base href="/">');</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#E8ECE5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1412" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Muster">
+<meta name="description" content="Mark when you are free this weekend, and see when everyone else is.">
+<meta property="og:title" content="Muster">
+<meta property="og:description" content="Mark when you are free this weekend, and see when everyone else is.">
+<meta property="og:site_name" content="Muster">
+<title>Muster</title>
+<style>
+/* Hanken Grotesk ships with the page (fonts/, SIL OFL). */
+@font-face {
+  font-family: "Hanken Grotesk";
+  src: url("fonts/hanken-grotesk-latin.woff2") format("woff2");
+  font-weight: 400 600;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Hanken Grotesk";
+  src: url("fonts/hanken-grotesk-latin-ext.woff2") format("woff2");
+  font-weight: 400 600;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* The family's paper and ink: sage-grey paper, near-black for what you press,
+   blue for links. Green is free, amber is maybe, grey is busy. */
+:root {
+  --bg: #E8ECE5;
+  --surface: #F7F8F4;
+  --ink: #14211C;
+  --muted: #5B6861;
+  --line: #CDD5CC;
+  --line-strong: #8C968F;
+  --accent: #2C53C4;
+  --pos: #1D7548;
+  --neg: #B0392D;
+  --mid: #8F5E0E;
+  --off: #5B6861;
+  --on-ink: #F7F8F4;
+  --backdrop: rgba(10, 16, 14, .4);
+  --font: "Hanken Grotesk", "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1412;
+    --surface: #18211E;
+    --ink: #E4EAE5;
+    --muted: #8C9992;
+    --line: #2E3A35;
+    --line-strong: #5F6C66;
+    --accent: #85A2FF;
+    --pos: #5FC890;
+    --neg: #F08476;
+    --mid: #E3B25C;
+    --off: #8C9992;
+    --on-ink: #0E1412;
+    --backdrop: rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--font);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  padding-block: calc(28px + env(safe-area-inset-top, 0px)) calc(56px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; touch-action: manipulation; }
+h1, h2, h3, p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+#app { max-width: 600px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.muted { color: var(--muted); }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Top bar */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; margin-bottom: -6px; }
+.top-when { font-size: .88rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.top-left { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.top-right { display: flex; align-items: center; gap: 14px; flex: none; }
+.mark { font-size: 1.2rem; font-weight: 600; letter-spacing: -.01em; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none; }
+.icon-btn {
+  flex: none; display: grid; place-items: center;
+  width: 44px; height: 44px; margin: 0 -8px;
+  background: none; border: 0; border-radius: 50%; color: var(--muted);
+}
+.icon-btn:hover { color: var(--ink); }
+.top-left .icon-btn { margin-left: -12px; }
+.mark-n { flex: none; margin-left: 6px; min-width: 22px; padding: 0 6px; font-size: .78rem; font-weight: 600; line-height: 20px; text-align: center; font-variant-numeric: tabular-nums; color: var(--muted); border: 1px solid var(--line-strong); border-radius: 11px; }
+.status { margin: -14px 0 -6px; font-size: .84rem; color: var(--muted); }
+
+/* Buttons */
+.btn {
+  appearance: none; display: inline-flex; align-items: center; justify-content: center;
+  min-height: 46px; padding: 0 18px; border-radius: 6px;
+  font-size: .95rem; font-weight: 600; text-decoration: none;
+  background: var(--ink); border: 1px solid var(--ink); color: var(--on-ink);
+}
+.btn.ghost { background: transparent; border-color: var(--line-strong); color: var(--ink); }
+.btn.wide { width: 100%; }
+.link { position: relative; appearance: none; padding: 6px 0; background: none; border: 0; font-size: .88rem; font-weight: 600; color: var(--accent); text-decoration: none; }
+/* Text buttons stay small on screen but take a full-size tap */
+.link::after { content: ""; position: absolute; inset: -9px -6px; }
+.link.quiet { color: var(--muted); font-weight: 500; }
+.link.danger { color: var(--neg); }
+.ev-foot { display: flex; align-items: center; gap: 16px; margin-top: -2px; }
+.ev-foot .ev-del { margin-left: auto; }
+
+/* Sections and cards */
+.section { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; min-height: 30px; padding: 0 2px; }
+.sec-head h2 { font-size: .95rem; font-weight: 600; }
+.sec-head .muted { font-size: .88rem; }
+.sec-side { display: flex; align-items: center; gap: 10px; }
+/* A weekend's five slots as bars: the taller, the more of the group is free. */
+.sky { display: flex; align-items: flex-end; gap: 2px; height: 18px; }
+.sky i { position: relative; width: 5px; height: 100%; border-radius: 2px; background: var(--line); overflow: hidden; }
+.sky i.gap { margin-left: 3px; }
+.sky i.past { opacity: .45; }
+.sky b { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 2px; background: var(--pos); transform-origin: bottom; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.empty { padding: 2px 2px 0; font-size: .9rem; color: var(--muted); }
+
+/* Three answers side by side: the one you gave is filled in */
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border: 1px solid var(--line-strong); border-radius: 6px; overflow: hidden; }
+.seg button {
+  appearance: none; min-height: 44px; padding: 0 4px; border: 0; border-left: 1px solid var(--line);
+  background: none; font-size: .86rem; font-weight: 500; color: var(--muted); white-space: nowrap;
+}
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); font-weight: 600; }
+.seg button:focus-visible { outline-offset: -3px; }
+.seg small { font-size: .8rem; font-weight: 400; margin-left: 5px; opacity: .8; }
+
+/* Your answer: a knob you drag, or tap, to one of three stops. Until you
+   answer it waits in the middle, hollow, and counts for nothing. */
+.slide {
+  --p: 1; position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 9px;
+  touch-action: pan-y; user-select: none; -webkit-user-select: none;
+}
+.slide[data-pos="0"] { --p: 0; --knob: var(--pos); }
+.slide[data-pos="1"] { --knob: var(--mid); }
+.slide[data-pos="2"] { --p: 2; --knob: var(--off); }
+.knob {
+  position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc((100% - 6px) / 3); border-radius: 6px;
+  background: var(--knob, transparent); transform: translateX(calc(var(--p) * 100%));
+  transition: transform .24s cubic-bezier(.3, 1.2, .4, 1), background-color .15s;
+}
+.slide[data-pos="-"] .knob { outline: 1.5px dashed var(--line-strong); outline-offset: -1.5px; }
+.slide.drag .knob, .slide.still .knob { transition: background-color .15s; }
+.slide.drag { cursor: grabbing; }
+.slide button {
+  position: relative; appearance: none; min-height: 44px; padding: 0 2px; border: 0; border-radius: 6px;
+  background: none; font-size: .86rem; font-weight: 500; color: var(--muted); white-space: nowrap; transition: color .15s;
+}
+.slide[data-pos="0"] button:nth-of-type(1), .slide[data-pos="1"] button:nth-of-type(2), .slide[data-pos="2"] button:nth-of-type(3) { color: var(--on-ink); font-weight: 600; }
+.slide button:focus-visible { outline-offset: -2px; }
+.slide small { font-size: .8rem; font-weight: 400; margin-left: 4px; opacity: .85; }
+
+/* A weekend: one row for each night and day */
+.slot { display: grid; grid-template-columns: minmax(0, 1fr) 174px; align-items: center; gap: 0 10px; padding: 8px 10px 8px 0; border-top: 1px solid var(--line); }
+.slot:first-child { border-top: 0; }
+.slot-info { appearance: none; display: grid; gap: 0; min-height: 44px; padding: 0 0 0 14px; background: none; border: 0; text-align: left; align-content: center; }
+.slot-name { display: flex; align-items: center; gap: 6px; font-weight: 500; }
+.slot-name svg { color: var(--muted); transition: transform .15s; }
+.slot-info[aria-expanded="true"] .slot-name svg { transform: rotate(180deg); }
+.slot-n { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 7px; font-size: .84rem; color: var(--muted); }
+/* One block a person: green free, amber maybe, grey busy, pale no answer */
+.pips { flex: none; display: block; fill: var(--line); }
+.pips .f { fill: var(--pos); } .pips .m { fill: var(--mid); } .pips .b { fill: var(--line-strong); }
+.slot-n b { display: inline-block; font-weight: 600; color: var(--ink); }
+.slot-n.all { color: var(--pos); font-weight: 600; }
+.top-slot { margin-left: 2px; padding: 0 5px; font-size: .7rem; font-weight: 600; line-height: 16px; color: var(--pos); border: 1px solid color-mix(in srgb, var(--pos) 45%, var(--surface)); border-radius: 4px; }
+/* Everyone can come: a dot that keeps ringing. */
+.live { position: relative; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--pos); }
+.live::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--pos); animation: ring 2.4s ease-out infinite; }
+@keyframes ring { from { opacity: .55; transform: scale(1); } 70%, to { opacity: 0; transform: scale(3.2); } }
+.who-box { grid-column: 1 / -1; display: grid; justify-items: start; gap: 8px; padding: 4px 4px 6px 14px; }
+
+/* Everyone by name, and how they answered: filled is yes, dashed is maybe,
+   struck through is no, dotted hasn't said. */
+.roster { display: flex; flex-wrap: wrap; gap: 5px; width: 100%; margin: 0; padding: 0; list-style: none; }
+.roster li { display: inline-flex; align-items: baseline; gap: 5px; max-width: 100%; min-height: 26px; padding: 2px 8px; border: 1px solid transparent; border-radius: 5px; font-size: .84rem; line-height: 20px; white-space: nowrap; }
+.roster .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.roster .in { background: color-mix(in srgb, var(--pos) 14%, var(--surface)); border-color: color-mix(in srgb, var(--pos) 42%, var(--surface)); font-weight: 500; }
+.roster .maybe { background: color-mix(in srgb, var(--mid) 8%, var(--surface)); border: 1px dashed color-mix(in srgb, var(--mid) 75%, var(--surface)); }
+.roster .out { padding-inline: 4px; color: var(--muted); }
+.roster .out .nm { text-decoration: line-through; text-decoration-color: var(--line-strong); }
+.roster .none { color: var(--muted); border: 1px dotted var(--line-strong); }
+.roster .me { font-weight: 600; }
+.roster small { font-size: .74rem; font-weight: 400; color: var(--muted); }
+.roster .more { padding: 0; }
+.roster .more button { appearance: none; min-height: 26px; padding: 0 8px; background: none; border: 0; font-size: .84rem; font-weight: 600; color: var(--accent); }
+@media (max-width: 350px) { .slot { grid-template-columns: minmax(0, 1fr) 156px; } .slide button { font-size: .8rem; } }
+
+/* Events */
+.events { display: grid; gap: 8px; }
+.ev { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 12px 14px 14px; overflow: hidden; }
+.ev-top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+/* The date, the way a ticket carries it. */
+.ev-date { display: grid; justify-items: center; align-content: center; min-width: 46px; height: 46px; padding: 0 7px; border-radius: 6px; background: var(--bg); line-height: 1; }
+.ev-date b { font-size: 1.3rem; font-weight: 600; letter-spacing: -.02em; }
+.ev-date.wide b { font-size: 1rem; }
+.ev-date span { margin-top: 3px; font-size: .66rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.ev-date.now { background: var(--ink); color: var(--on-ink); }
+.ev-date.now span { color: inherit; opacity: .75; }
+.ev-when { font-size: .84rem; color: var(--muted); }
+.ev-title { font-size: 1.05rem; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+/* Where the stub tears off. */
+.ev-tear { position: relative; height: 0; margin: 2px -14px; border-top: 1.5px dashed var(--line); }
+.ev-tear::before, .ev-tear::after { content: ""; position: absolute; top: -8px; width: 14px; height: 14px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); }
+.ev-tear::before { left: -8px; }
+.ev-tear::after { right: -8px; }
+.ev-part { display: flex; align-items: center; justify-content: space-between; gap: 6px 12px; }
+.ev-part.long { display: grid; }
+.ev-part > span { font-size: .86rem; color: var(--muted); }
+.ev-part .seg button { min-height: 34px; padding: 0 14px; font-size: .86rem; }
+
+/* Sheets */
+.backdrop { position: fixed; inset: 0; background: var(--backdrop); z-index: 10; }
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 11; margin: 0 auto; max-width: 600px; max-height: 88vh; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--bg); border: 1px solid var(--line); border-bottom: 0; border-radius: 8px 8px 0 0; outline: 0;
+}
+.sheet.rise { animation: rise .26s cubic-bezier(.2, .9, .3, 1); }
+.backdrop.rise { animation: dim .2s; }
+@keyframes rise { from { transform: translateY(28px); opacity: 0; } }
+@keyframes dim { from { opacity: 0; } }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 56px; padding: 6px 20px; border-bottom: 1px solid var(--line); }
+.sheet-head h2 { font-size: 1rem; font-weight: 600; }
+.sheet-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 18px max(20px, env(safe-area-inset-left, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)); }
+@media (max-width: 480px) { .sheet-head { padding: 6px 16px; } .sheet-body { padding-left: 16px; padding-right: 16px; } }
+.sheet form { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.hint { font-size: .86rem; color: var(--muted); }
+
+.field { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; min-width: 0; }
+.field-label { font-size: .8rem; font-weight: 500; color: var(--muted); }
+input[type=text], select {
+  width: 100%; min-height: 46px; padding: 0 12px; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-strong); border-radius: 6px; font-size: 16px;
+}
+input[type=text]:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+input::placeholder { color: var(--muted); opacity: .8; }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.seg.five button { min-height: 52px; line-height: 1.2; white-space: normal; }
+.seg.five button:disabled { opacity: .35; cursor: default; }
+
+.people { border-top: 1px solid var(--line); }
+.person { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; border-bottom: 1px solid var(--line); }
+.person span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.person em { font-style: normal; color: var(--muted); font-size: .86rem; }
+.foot-links { display: flex; flex-wrap: wrap; gap: 6px 22px; }
+
+/* Home and joining */
+.lead { max-width: 21ch; font-size: 1.55rem; font-weight: 500; line-height: 1.25; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.lead + p { margin-top: 10px; color: var(--muted); max-width: 34ch; }
+.rows { border-top: 1px solid var(--line); }
+.rows a { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 0 2px; border-bottom: 1px solid var(--line); text-decoration: none; font-weight: 500; color: var(--ink); }
+.rows a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rows a svg { color: var(--muted); flex: none; }
+form.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.names { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* First run: one question a screen. The screen fills the phone so the way on,
+   and the small print, sit at the foot. */
+.onb { display: flex; flex-direction: column; gap: 24px; min-height: calc(100dvh - 84px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); }
+.onb .lead { max-width: 16ch; margin: 0 auto; text-align: center; font-size: 1.9rem; font-weight: 600; line-height: 1.15; letter-spacing: -.02em; }
+.onb .ask { font-size: 1.55rem; font-weight: 600; line-height: 1.2; letter-spacing: -.015em; }
+.onb form.stack { gap: 14px; }
+.onb form.stack input { min-height: 54px; font-size: 18px; }
+.onb .btn { min-height: 52px; font-size: 1rem; }
+.onb .end { margin-top: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.inv .kick { margin-bottom: 4px; font-size: .95rem; font-weight: 500; color: var(--muted); }
+.inv .ask { font-size: 1.9rem; line-height: 1.15; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.inv .who { margin-top: 10px; color: var(--muted); overflow-wrap: anywhere; }
+.inv .wk-cap { padding: 0 6px; font-size: .84rem; color: var(--muted); }
+.inv .wk-say.none { font-weight: 400; color: var(--muted); }
+.inv .wk-say.none::before { background: var(--line-strong); }
+.inv .end { gap: 14px; }
+.inv .mine { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); }
+.inv .mine p { font-size: .9rem; color: var(--muted); }
+.inv .names .btn { min-height: 44px; font-size: .95rem; }
+.inv .legal { margin-top: -4px; }
+.onb .groups-acts { grid-template-columns: 1fr 1fr; }
+/* A step sits in the middle, a little high so the keyboard clears it. */
+.onb .mid { flex: 1; display: flex; flex-direction: column; gap: 24px; text-align: center; }
+.onb .mid::before { content: ''; flex: 1; }
+.onb .mid::after { content: ''; flex: 2.5; }
+.onb .mid.even::after { flex: 1; }
+.onb .mid input { text-align: center; }
+.bad { color: var(--neg); font-size: .86rem; }
+/* A join code: four letters, typed into one field drawn as four boxes. */
+.code-in { position: relative; display: block; }
+.code-in input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; font-size: 18px; }
+.cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.cells i { display: grid; place-items: center; height: 72px; font-style: normal; font-size: 2rem; font-weight: 600; background: var(--surface); border: 1px solid var(--line-strong); border-radius: 8px; }
+.code-in:focus-within .cells i.at { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.btn:disabled { opacity: .4; }
+.invite-foot { display: flex; justify-content: center; }
+
+/* A weekend in miniature: a bar a friend for each slot, and the slot that suits everyone. */
+.wk { display: grid; gap: 14px; padding: 16px 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.wk-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.wk-col { display: grid; gap: 6px; padding: 10px 6px; border: 1.5px solid transparent; border-radius: 6px; }
+.wk-col.best { border-color: var(--ink); }
+.wk-col b { display: block; margin-bottom: 4px; font-size: .74rem; font-weight: 600; line-height: 1.25; text-align: center; }
+.wk-col b span { display: block; font-weight: 400; color: var(--muted); }
+.wk-col i { height: 16px; border-radius: 4px; background: var(--line); animation: wk-in .45s both; animation-delay: calc(var(--c) * 80ms + var(--r) * 40ms + 120ms); }
+.wk-col i.f { background: var(--pos); }
+.wk-col i.m { background: var(--mid); }
+.wk-say { display: flex; align-items: center; gap: 8px; padding: 0 6px; font-size: .9rem; font-weight: 600; }
+.wk-say::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--pos); }
+@keyframes wk-in { from { opacity: 0; transform: scaleX(.4); } }
+
+/* Two tall tiles share the screen, so the choice is the page. */
+.pick { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.pick button { appearance: none; display: grid; justify-items: center; gap: 4px; padding: 28px 18px 26px; text-align: center; color: var(--ink); background: var(--surface); border: 1px solid var(--line-strong); border-radius: 10px; }
+.pick button:active { background: color-mix(in srgb, var(--ink) 6%, var(--surface)); }
+.pick .ic { display: grid; place-items: center; width: 54px; height: 54px; margin-bottom: 12px; border-radius: 50%; background: var(--ink); color: var(--on-ink); }
+.pick .ic svg { width: 24px; height: 24px; }
+/* Join shows what a code looks like. */
+.pick .eg { display: flex; align-items: center; gap: 6px; height: 54px; margin-bottom: 12px; }
+.pick .eg i { display: grid; place-items: center; width: 36px; height: 44px; font-style: normal; font-size: 1.1rem; font-weight: 600; color: var(--muted); border: 1px solid var(--line-strong); border-radius: 6px; background: color-mix(in srgb, var(--ink) 4%, var(--surface)); }
+.pick strong { display: block; font-size: 1.4rem; font-weight: 600; line-height: 1.2; letter-spacing: -.015em; }
+.pick small { display: block; font-size: .95rem; color: var(--muted); }
+
+/* A group on the home screen: its weekend at a glance. */
+.gcards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.gcard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 16px 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; text-decoration: none; color: var(--ink); }
+.gcard:active { background: color-mix(in srgb, var(--ink) 5%, var(--surface)); }
+.gcard-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 6px; }
+.gcard-head strong { display: block; font-size: 1.15rem; font-weight: 600; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gcard-head small { display: block; font-size: .84rem; color: var(--muted); }
+.gcard-head svg { flex: none; color: var(--muted); }
+.gcard .wk-col i { height: 10px; border-radius: 3px; animation-duration: .35s; animation-delay: calc(var(--c) * 45ms + var(--r) * 20ms + 60ms); }
+.gcard .wk-say.none { font-weight: 400; color: var(--muted); }
+.gcard .wk-say.none::before { background: var(--line-strong); }
+
+.legal { margin-top: 4px; padding: 10px 0; text-align: center; font-size: .8rem; color: var(--muted); }
+.legal a { color: inherit; }
+a.person { color: inherit; text-decoration: none; }
+/* About: who made this and which build it is, then the ways out. */
+.about-id { display: grid; justify-items: center; gap: 4px; padding: 6px 0 18px; text-align: center; }
+.about-id img { margin-bottom: 10px; border-radius: 15px; }
+.about-id p, .about-foot { margin: 0; }
+/* About is a page of its own: it fills the screen and Back leaves it */
+.sheet.page { top: 0; max-width: none; max-height: none; display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); border: 0; border-radius: 0; }
+.sheet.page.rise { animation: dim .18s; }
+.sheet.page > * { width: 100%; max-width: 600px; margin-inline: auto; }
+.sheet-head.back { justify-content: flex-start; gap: 4px; padding-left: 6px; }
+.sheet-head .back { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; background: none; border: 0; color: var(--ink); }
+.sheet.page .sheet-body { flex: 1; display: flex; flex-direction: column; padding-top: 36px; }
+.sheet.page .about-foot { margin-top: auto; }
+/* About's links: plain centred text, no rows */
+.about-links { display: grid; justify-items: center; text-align: center; }
+.about-links a, .about-links button { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 10px; background: none; border: 0; font-size: .95rem; color: var(--ink); text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 30%, transparent); text-underline-offset: 4px; }
+.about-links [hidden] { display: none; }
+.about-links .about-mail { font-weight: 600; }
+.about-legal { display: flex; align-items: center; justify-content: center; }
+.about-legal i { flex: none; width: 3px; height: 3px; border-radius: 50%; background: var(--muted); }
+.about-links .about-upd { min-height: 40px; margin-bottom: 10px; padding: 0 18px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); border-radius: 99px; text-decoration: none; }
+.about-upd span { color: var(--muted); }
+.about-upd span:empty { display: none; }
+.about-name { font-size: 1.4rem; font-weight: 600; letter-spacing: -.02em; }
+.about-tag { color: var(--muted); }
+.about-ver { margin-top: 8px !important; padding: 4px 12px; border: 1px solid var(--line); border-radius: 99px; font-size: .82rem; font-variant-numeric: tabular-nums; color: var(--muted); }
+.about-foot { padding-top: 16px; text-align: center; font-size: .8rem; color: var(--muted); }
+a.person:active { background: color-mix(in srgb, var(--ink) 5%, transparent); }
+.lone { display: grid; gap: 10px; justify-items: start; margin-top: 12vh; }
+.lone h1 { font-size: 1.3rem; font-weight: 600; line-height: 1.3; }
+.lone p { color: var(--muted); }
+
+#toast {
+  position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 20;
+  background: var(--ink); color: var(--on-ink); border-radius: 6px; padding: 10px 14px; font-size: .9rem; font-weight: 600;
+  opacity: 0; pointer-events: none; transition: opacity .15s; max-width: calc(100vw - 32px);
+}
+#toast.show { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="sheet"></div>
+<div id="toast" role="status"></div>
+<script src="lib.js?v=2"></script>
+<script>
+if ('serviceWorker' in navigator && !window.musterApp) navigator.serviceWorker.register('/sw.js').catch(() => {});
+</script>
+<script>
+(() => {
+  const L = Muster;
+  const app = document.getElementById('app'), sheetRoot = document.getElementById('sheet'), toastEl = document.getElementById('toast');
+  const WEEKS = 8;
+
+  // Inside the iPhone app the pages come with the app, and the app lends what a
+  // page can't do alone: the share sheet, a tick under the thumb, reminders.
+  const shell = window.musterApp || null;
+  const SITE = shell ? 'https://muster.teloone.au' : location.origin;
+  const API = shell ? SITE : '';
+  const tell = m => shell.postMessage(JSON.stringify(m));
+
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const rid = () => btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const clean = (s, max) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, max);
+  const ls = {
+    get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} },
+  };
+
+  const GEAR = '<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h9M16 6h1M3 14h1M8 14h9"/><circle cx="14" cy="6" r="2"/><circle cx="6" cy="14" r="2"/></svg>';
+  const BACK = '<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4.5L7 10l5.5 5.5"/></svg>';
+  const DOWN = '<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4.5L6 8l3.5-3.5"/></svg>';
+  const ANSWERS = [['f', 'Free'], ['m', 'Maybe'], ['b', 'Busy']];
+  const REPLIES = [['in', 'Going'], ['maybe', 'Maybe'], ['out', 'No']];
+
+  let saved = ls.get('muster.groups', []);
+  let G = null;            // the open group: { id, me, state, queue, gone, failed, offline }
+  let ui = { open: {}, more: false, sheet: null, confirm: null };
+  let view = '', drawn = null;
+
+  // ---- Keeping in step with the server ----
+
+  const persist = g => { ls.set('muster.g.' + g.id, { state: g.state, queue: g.queue }); plan(); };
+  function remember(g) {
+    const at = saved.findIndex(s => s.id === g.id);
+    const row = { id: g.id, name: g.state ? g.state.group.name : (at >= 0 ? saved[at].name : ''), me: g.me };
+    if (at >= 0) saved[at] = row; else saved.unshift(row);
+    ls.set('muster.groups', saved);
+    plan();
+  }
+
+  function forget(id) { saved = saved.filter(s => s.id !== id); ls.set('muster.groups', saved); ls.del('muster.g.' + id); plan(); }
+
+  // The Thursday reminder, in the iPhone app. The phone shows it by itself: one
+  // for each weekend ahead you haven't fully answered, at 6 the evening before.
+  const remindOn = () => !!ls.get('muster.remind', false);
+  // Notifications were refused: only the phone's Settings can turn them back on.
+  let remindBlocked = false;
+  let planned = '';
+  function plan() {
+    if (!shell) return;
+    const items = [], now = Date.now();
+    if (remindOn()) {
+      const mine = saved.map(g => ({ g, c: ls.get('muster.g.' + g.id, null) })).filter(x => x.g.me && x.c && x.c.state);
+      for (const w of L.weeks(new Date(), WEEKS)) {
+        const at = L.parse(L.addDays(w, -1)); at.setHours(18, 0, 0, 0);
+        if (at.getTime() <= now) continue;
+        const open = mine.find(x => (((x.c.state.marks || {})[x.g.me] || {})[w] || L.BLANK).includes('-'));
+        if (open) items.push({ id: 'weekend-' + w, at: at.getTime(), title: open.g.name || 'Muster', body: "Mark when you're free this weekend.", open: '/g/' + open.g.id });
+      }
+    }
+    const next = JSON.stringify(items);
+    if (next === planned) return;
+    planned = next;
+    tell({ type: 'notify', items });
+  }
+
+  // Changes go a slice at a time, so a long list made offline never asks too much of one request.
+  const SLICE = 40;
+  // The iPhone app gives the page a little longer to send when it goes out of sight.
+  let owing = null;
+  function owe() {
+    if (!shell) return;
+    const on = !!(G && G.id && G.queue.length && !G.gone && !G.left);
+    if (on !== owing) { owing = on; tell({ type: 'unsent', on }); }
+  }
+
+  let busy = false, fails = 0, again = 0;
+  async function sync() {
+    if (!G || !G.id || busy) return;
+    const g = G;
+    busy = true;
+    clearTimeout(again);
+    let ok = false;
+    try {
+      const sending = g.queue.slice(0, SLICE);
+      const res = sending.length
+        ? await fetch(`${API}/api/g/${g.id}/ops`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: sending }) })
+        : await fetch(`${API}/api/g/${g.id}`, { cache: 'no-store', headers: g.state && g.state.group.version ? { 'If-None-Match': `"${g.state.group.version}"` } : {} });
+      if (res.status === 304) {
+        ok = true;
+      } else if (res.ok) {
+        const fresh = await res.json();
+        g.queue = g.queue.slice(sending.length);
+        g.queue.forEach(op => L.applyOp(fresh, op));
+        g.state = fresh;
+        ok = true;
+        if (!g.left) { persist(g); if (g.me) remember(g); }
+      } else if (res.status === 404) {
+        g.gone = true; g.queue = []; ok = true; forget(g.id);
+      } else if (res.status >= 400 && res.status < 500 && res.status !== 408 && res.status !== 429 && sending.length) {
+        // The server won't take these: drop them rather than jam the queue.
+        g.queue = g.queue.slice(sending.length); if (!g.left) persist(g); ok = true;
+      } else throw new Error(String(res.status));
+    } catch (e) {
+      g.failed = true;
+    }
+    busy = false;
+    if (g !== G) return sync();
+    owe();
+    const was = g.offline;
+    g.offline = !ok;
+    if (ok) { fails = 0; g.failed = false; } else { fails = Math.min(fails + 1, 5); again = setTimeout(sync, 1500 * 2 ** fails); }
+    refresh(was !== g.offline);
+    if (ok && g.queue.length) sync();
+  }
+
+  // A change: shown at once, kept until the server has it.
+  function push(...ops) {
+    ops.forEach(op => L.applyOp(G.state, op));
+    G.queue.push(...ops);
+    persist(G);
+    owe();
+    sync();
+  }
+
+  setInterval(() => { if (!document.hidden && G) sync(); }, 20000);
+  setInterval(() => { if (!document.hidden) refresh(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && G) { sync(); refresh(); } });
+  window.addEventListener('online', () => sync());
+
+  // ---- Which screen ----
+
+  function route() {
+    const m = location.pathname.match(/^\/g\/([A-Za-z0-9_-]{22})\/?$/);
+    const j = location.pathname.match(/^\/j\/([A-Za-z]{4})\/?$/);
+    ui = { open: {}, more: false, sheet: null, confirm: null };
+    // A join code's short link: find its group, then carry on as if its link had been opened.
+    if (j) { G = { id: '', code: j[1].toUpperCase(), me: null, state: null, queue: [] }; seek(); }
+    // A group link that's the wrong length: say so, rather than show the home screen.
+    else if (!m && /^\/[gj]\//.test(location.pathname)) G = { id: '', me: null, state: null, queue: [], gone: true, why: location.pathname[1] === 'j' ? 'none' : '' };
+    else if (!m) { G = null; }
+    else {
+      const id = m[1], s = saved.find(x => x.id === id), c = ls.get('muster.g.' + id, null);
+      G = { id, me: s ? s.me : null, state: c ? c.state : null, queue: c && c.queue ? c.queue : [] };
+      sync();
+    }
+    view = '';
+    owe();
+    render();
+    renderSheet();
+    window.scrollTo(0, 0);
+  }
+  // The group a join code leads to.
+  async function find(code) {
+    try {
+      const res = await fetch(`${API}/api/code/${code}`, { cache: 'no-store' });
+      if (res.ok) return { id: (await res.json()).id };
+      return { err: res.status === 404 ? 'none' : res.status === 429 ? 'many' : 'net' };
+    } catch (e) { return { err: 'net' }; }
+  }
+  async function seek() {
+    const g = G, r = await find(g.code);
+    if (g !== G) return;
+    if (r.id) { history.replaceState(null, '', '/g/' + r.id); path = location.pathname; return route(); }
+    if (r.err === 'net') g.failed = true; else { g.gone = true; g.why = r.err; }
+    render();
+  }
+  let path = location.pathname;
+  function go(to) { history.pushState(null, '', to); path = location.pathname; route(); }
+  // Back closes an open sheet and stays on the board.
+  window.addEventListener('popstate', () => {
+    if (location.pathname === path) {
+      if (ui.sheet) { ui.sheet = null; ui.confirm = null; renderSheet(); }
+      else if (!G) { ui.bad = false; ui.code = ''; render(); window.scrollTo(0, 0); }
+      return;
+    }
+    path = location.pathname; route();
+  });
+
+  const kind = () => !G ? 'home' : G.gone ? 'gone' : !G.state ? (G.failed ? 'failed' : 'loading') : (!G.me || !L.member(G.state, G.me)) ? 'join' : 'board';
+  // After news from the server: redraw the board, but leave a form someone may be typing in.
+  function refresh(force) {
+    const k = kind();
+    if (k !== view || k === 'board' || force && k !== 'home' && k !== 'join') render();
+    // An open sheet keeps up too, unless someone is typing or choosing in it.
+    const at = document.activeElement;
+    if (ui.sheet && view === 'board' && !(at && sheetRoot.contains(at) && /^(INPUT|TEXTAREA|SELECT)$/.test(at.tagName))) renderSheet(true);
+  }
+
+  function render() {
+    view = kind();
+    document.title = G && G.state ? `${G.state.group.name} · Muster` : 'Muster';
+    if (view !== 'board' && ui.sheet && ui.sheet.kind !== 'about') { ui.sheet = null; renderSheet(); }
+    const html = ({ home, gone, failed, loading, join, board })[view]();
+    // Nothing new: leave the page alone, so focus and half-typed names survive.
+    if (html === drawn) return;
+    drawn = html;
+    const was = stage, old = snap();
+    stage = view + '|' + (view === 'home' ? step() : G ? G.id : '');
+    app.innerHTML = html;
+    move(old, stage !== was);
+  }
+
+  // ---- Movement ----
+  // The page is drawn afresh each time, so what moves is worked out from where
+  // each named piece (data-k) sat before and sits now: a piece that changed
+  // place slides there, a new one arrives, a changed one shows it.
+  const calm = matchMedia('(prefers-reduced-motion: reduce)');
+  const EASE = 'cubic-bezier(.2, .9, .3, 1)';
+  let stage = '';
+  function snap() {
+    const m = new Map();
+    if (calm.matches || !app.animate) return m;
+    for (const el of app.querySelectorAll('[data-k]')) m.set(el.dataset.k, { r: el.getBoundingClientRect(), sig: el.dataset.sig });
+    return m;
+  }
+  function move(old, fresh) {
+    if (calm.matches || !app.animate) return;
+    // A new screen comes in a piece at a time.
+    if (fresh) {
+      [...app.children].forEach((el, n) => el.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 320, delay: Math.min(n, 6) * 45, easing: EASE, fill: 'backwards' }));
+      app.querySelectorAll('[data-fx="bar"]').forEach((el, n) => el.animate([{ transform: 'scaleY(0)' }, { transform: 'none' }], { duration: 420, delay: 160 + Math.min(n, 20) * 22, easing: EASE, fill: 'backwards' }));
+      return;
+    }
+    const els = [...app.querySelectorAll('[data-k]')], by = new Map();
+    for (const el of els) {
+      const o = old.get(el.dataset.k); if (!o) continue;
+      const r = el.getBoundingClientRect();
+      by.set(el, { x: o.r.left - r.left, y: o.r.top - r.top, o, r });
+    }
+    let born = 0;
+    for (const el of els) {
+      const d = by.get(el), fx = el.dataset.fx;
+      if (!d) {
+        if (fx === 'bar') el.animate([{ transform: 'scaleY(0)' }, { transform: 'none' }], { duration: 360, easing: EASE });
+        else if (!fx) el.animate([{ opacity: 0, transform: 'scale(.92)' }, { opacity: 1, transform: 'none' }], { duration: 240, delay: Math.min(born++, 14) * 16, easing: EASE, fill: 'backwards' });
+        continue;
+      }
+      if (fx === 'bar') {
+        if (d.r.height && Math.abs(d.o.r.height - d.r.height) > .5) el.animate([{ transform: `scaleY(${d.o.r.height / d.r.height})` }, { transform: 'none' }], { duration: 380, easing: EASE });
+        continue;
+      }
+      // Inside something that itself moved, only the difference is this piece's own.
+      const up = el.parentElement.closest('[data-k]'), u = up && by.get(up);
+      const x = d.x - (u ? u.x : 0), y = d.y - (u ? u.y : 0), changed = d.o.sig !== el.dataset.sig;
+      if (fx === 'tick') { if (changed) el.animate([{ opacity: 0, transform: 'translateY(70%)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: EASE }); }
+      else if (fx === 'pop') { if (changed) el.animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(1.9)' }, { transform: 'scaleY(1)' }], { duration: 320, easing: 'ease-out' }); }
+      else if (Math.abs(x) > .5 || Math.abs(y) > .5) el.animate([{ transform: `translate(${x}px, ${y}px)` }, { transform: 'none' }], { duration: 360, easing: EASE });
+      else if (changed) el.animate([{ transform: 'scale(.9)' }, { transform: 'none' }], { duration: 260, easing: EASE });
+    }
+  }
+
+  // ---- Screens ----
+
+  const chev = () => '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>';
+  const ABOUT = '<button class="link quiet" data-act="about">About</button>';
+  const bar = () => `<header class="top"><a class="mark" href="/" data-nav>Muster</a>${ABOUT}</header>`;
+
+  // The terms, privacy and the way to us live in About. The screens that begin
+  // something say only that going on agrees to the terms.
+  const agree = () => `<p class="legal">By continuing you agree to the <a href="https://teloone.au/apps/muster/terms/">terms</a>.</p>`;
+
+  // Home asks one thing a screen. Each step is an entry in the phone's history,
+  // so back, and a swipe from the edge, go to the step before.
+  const step = () => (history.state && history.state.step) || '';
+  let after = '';
+  function toStep(s) {
+    history.pushState({ step: s }, '', '/'); path = location.pathname;
+    ui.bad = false; ui.code = '';
+    render(); window.scrollTo(0, 0);
+    const el = app.querySelector('.onb form input'); if (el) el.focus();
+  }
+  const stepBar = () => `<header class="top"><div class="top-left"><button class="icon-btn" data-act="back" aria-label="Back">${BACK}</button><span class="mark">Muster</span></div></header>`;
+  const WEEKEND = ['fbmf', 'bfbm', 'ffff', 'mfbb', 'bmfb'];
+  const weekend = () => `<div class="wk" role="img" aria-label="Four friends' answers for each part of the weekend. Saturday night suits everyone.">
+      <div class="wk-grid" aria-hidden="true">${L.SLOTS.map((sl, c) => `<div class="wk-col${c === 2 ? ' best' : ''}"><b>${sl.day}<span>${sl.part}</span></b>${[...WEEKEND[c]].map((v, r) => `<i class="${v}" style="--c:${c};--r:${r}"></i>`).join('')}</div>`).join('')}</div>
+      <p class="wk-say" aria-hidden="true">Saturday night suits everyone</p>
+    </div>`;
+
+  const PLUS = '<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg>';
+  // A group as the phone last saw it: this weekend, a bar a person for each slot.
+  function peek(st) {
+    const now = new Date(), week = L.weekKey(now), n = st.members.length, rows = Math.min(n, 8);
+    const top = L.best(st, [week], now)[0];
+    const cols = L.SLOTS.map((sl, i) => {
+      const r = L.roll(st, week, i);
+      // More than eight people share the eight bars out in proportion.
+      const cut = k => Math.round(k * rows / n);
+      const f = cut(r.f.length), m = Math.min(rows - f, cut(r.m.length)), b = Math.min(rows - f - m, cut(r.b.length));
+      const bars = 'f'.repeat(f) + 'm'.repeat(m) + 'b'.repeat(b) + '-'.repeat(rows - f - m - b);
+      return `<span class="wk-col${top && top.i === i ? ' best' : ''}"><b>${sl.day}<span>${sl.part}</span></b>${[...bars].map((v, r) => `<i class="${v === '-' ? '' : v}" style="--c:${i};--r:${r}"></i>`).join('')}</span>`;
+    }).join('');
+    const say = top ? (top.all ? `${L.slotName(top.i)} suits everyone` : `${L.slotName(top.i)} suits ${top.f} of ${n}`) : 'No time that suits yet';
+    return { top, cols, say };
+  }
+  function groupCard(s) {
+    const c = ls.get('muster.g.' + s.id, null), st = c && c.state;
+    const head = sub => `<span class="gcard-head"><span><strong>${esc(s.name || 'Group')}</strong>${sub ? `<small>${sub}</small>` : ''}</span>${chev()}</span>`;
+    if (!st || !st.members || !st.members.length) return `<a class="gcard" href="/g/${s.id}" data-nav>${head('')}</a>`;
+    const n = st.members.length, { top, cols, say } = peek(st);
+    return `<a class="gcard" href="/g/${s.id}" data-nav aria-label="${esc(s.name || 'Group')}. ${say}.">${head(`${n} ${n === 1 ? 'person' : 'people'} · This weekend`)}
+      <span class="wk-grid" aria-hidden="true">${cols}</span><span class="wk-say${top ? '' : ' none'}" aria-hidden="true">${say}</span></a>`;
+  }
+
+  const steps = {
+    welcome: () => `<div class="onb">${bar()}
+      <h1 class="lead">See when everyone's free this weekend.</h1>
+      ${weekend()}
+      <div class="end"><button class="btn wide" data-act="step" data-s="name">Get started</button>${agree()}</div></div>`,
+    groups: () => `<div class="onb"><header class="top"><a class="mark" href="/" data-nav>Muster</a><div class="top-right"><span class="top-when">${L.rangeLabel(L.weekKey(new Date()))}</span>${ABOUT}</div></header>
+      <h1 class="vh">Your groups</h1>
+      <nav class="gcards" aria-label="Your groups">${saved.map(groupCard).join('')}</nav>
+      <div class="end groups-acts"><button class="btn" data-act="step" data-s="create">Start a group</button><button class="btn ghost" data-act="step" data-s="link">Join a group</button></div></div>`,
+    name: () => `<div class="onb">${stepBar()}<div class="mid">
+      <h1 class="ask">What's your name?</h1>
+      <form class="stack" data-form="name" autocomplete="off">
+        <input type="text" name="me" maxlength="24" aria-label="Your name" value="${esc(ls.get('muster.name', ''))}" required autocapitalize="words" autocorrect="off" enterkeyhint="next">
+        <button class="btn wide">Continue</button>
+      </form></div></div>`,
+    choose: () => `<div class="onb">${stepBar()}<div class="mid even">
+      <h1 class="ask">Start a group, or join one?</h1>
+      <div class="pick">
+        <button data-act="step" data-s="create"><span class="ic">${PLUS}</span><strong>Start a group</strong><small>Then send your friends the code.</small></button>
+        <button data-act="step" data-s="link"><span class="eg" aria-hidden="true"><i>J</i><i>K</i><i>L</i><i>M</i></span><strong>Join a group</strong><small>With a code from a friend.</small></button>
+      </div></div></div>`,
+    create: () => `<div class="onb">${stepBar()}<div class="mid">
+      <h1 class="ask">Name your group</h1>
+      <form class="stack" data-form="create" autocomplete="off">
+        <input type="text" name="group" maxlength="40" aria-label="Group name" placeholder="The Usual Suspects" required autocapitalize="words" enterkeyhint="go">
+        <button class="btn wide">Start group</button>
+      </form></div></div>`,
+    link: () => `<div class="onb">${stepBar()}<div class="mid">
+      <h1 class="ask">Enter the group's code</h1>
+      <form class="stack" data-form="link" autocomplete="off">
+        <label class="code-in"><input type="text" name="link" aria-label="Group code, four letters" value="${esc(ui.code || '')}" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go">${cells(ui.code || '')}</label>
+        ${ui.bad ? `<p class="bad" role="alert">${BAD[ui.bad]}</p>` : ''}
+        <button class="btn wide">Join</button>
+      </form></div></div>`,
+  };
+  const cells = v => `<span class="cells" aria-hidden="true">${[0, 1, 2, 3].map(k => `<i${k === v.length ? ' class="at"' : ''}>${v[k] || ''}</i>`).join('')}</span>`;
+  const BAD = { none: 'No group has that code. Codes last a week.', many: "Too many tries. Wait an hour, or open the group's link.", net: "Can't reach Muster. Check your connection." };
+  const home = () => (steps[step()] || (saved.length ? steps.groups : steps.welcome))();
+
+  const loading = () => `${bar()}<div class="lone"><p>Fetching the group.</p></div>`;
+  const gone = () => {
+    const [h, p] = G.why === 'none' ? ["That code doesn't lead to a group.", 'Codes last a week. Ask for a new one.']
+      : G.why === 'many' ? ['Too many tries.', "Wait an hour, or open the group's link."]
+      : ["This link doesn't lead to a group.", "Check it's the whole link, or ask whoever sent it."];
+    return `${bar()}<div class="lone"><h1>${h}</h1><p>${p}</p><a class="btn" href="/" data-nav>Start a group</a></div>`;
+  };
+  const failed = () => `${bar()}<div class="lone"><h1>Can't reach Muster.</h1><p>Check your connection.</p><button class="btn" data-act="retry">Try again</button></div>`;
+
+  // Someone opened a group's link: what it is, who's in, and this weekend so far.
+  function join() {
+    const s = G.state, a = s.members.map(m => m.name), n = a.length;
+    const who = !n ? 'Nobody has joined yet. Be the first.'
+      : n === 1 ? `${a[0]} is in.` : n <= 3 ? `${a.slice(0, -1).join(', ')} and ${a[n - 1]} are in.` : `${a[0]}, ${a[1]} and ${n - 2} others are in.`;
+    const p = n ? peek(s) : null;
+    return `<div class="onb inv">
+      ${bar()}
+      <div><p class="kick">You're invited to</p><h1 class="ask">${esc(s.group.name)}</h1><p class="who">${esc(who)}</p></div>
+      ${p ? `<div class="wk" role="img" aria-label="This weekend so far. ${esc(p.say)}."><p class="wk-cap" aria-hidden="true">This weekend so far</p><div class="wk-grid" aria-hidden="true">${p.cols}</div><p class="wk-say${p.top ? '' : ' none'}" aria-hidden="true">${esc(p.say)}</p></div>` : ''}
+      <div class="end">
+        <form class="stack" data-form="join" autocomplete="off">
+          <input type="text" name="me" maxlength="24" value="${esc(ls.get('muster.name', ''))}" required placeholder="Your name" aria-label="Your name" autocapitalize="words" autocorrect="off" enterkeyhint="done">
+          <button class="btn wide">${ui.dup ? 'Join anyway' : 'Join'}</button>
+          ${ui.dup ? `<p class="hint">${esc(ui.dupName)} is already here. If that's you, tap your name below.</p>` : ''}
+        </form>
+        ${n ? `<div class="mine"><p>Already in it? Tap your name.</p><div class="names">${s.members.map(m => `<button class="btn ghost" data-act="claim" data-id="${m.id}">${esc(m.name)}</button>`).join('')}</div></div>` : ''}
+        ${agree()}
+      </div></div>`;
+  }
+
+  const openSlots = (w, now = new Date()) => L.SLOTS.map((_, i) => i).filter(i => !L.isPast(w, i, now));
+
+  function board() {
+    const s = G.state, now = new Date();
+    const weekList = L.weeks(now, WEEKS).slice(0, ui.more ? WEEKS : 4);
+    const events = s.plans.filter(p => !L.isPast(p.w, L.planSlots(p).at(-1), now)).sort((a, b) => (a.w < b.w ? -1 : a.w > b.w ? 1 : a.i - b.i));
+    return `
+      <header class="top">
+        <div class="top-left"><a class="icon-btn" href="/" data-nav aria-label="All your groups">${BACK}</a><h1 class="mark">${esc(s.group.name)}</h1><span class="mark-n" aria-label="${s.members.length} ${s.members.length === 1 ? 'person' : 'people'}">${s.members.length}</span></div>
+        <div class="top-right"><button class="link" data-act="invite">Invite</button><button class="icon-btn" data-act="settings" aria-label="You and the group">${GEAR}</button></div>
+      </header>
+      ${G.offline ? `<p class="status">Can't reach Muster. Your changes will send when you're back online.</p>` : ''}
+      <section class="section">
+        <div class="sec-head"><h2>Events</h2><button class="link" data-act="event">New event</button></div>
+        ${events.length ? `<div class="events">${events.map(event).join('')}</div>` : `<p class="empty">No events yet.</p>`}
+      </section>
+      ${weekList.map(w => week(w, now)).join('')}
+      ${ui.more ? '' : `<div><button class="link" data-act="more">Show later weekends</button></div>`}`;
+  }
+
+  // Where the knob sits: 0, 1 or 2, or '-' before you've answered.
+  const pos = (list, v) => { const k = list.findIndex(a => a[0] === v); return k < 0 ? '-' : k; };
+  // The group's answers as a strip of blocks, one a person up to twelve.
+  function pips(r, n, k) {
+    const gap = n > 12 ? 0 : .22, parts = [['f', r.f.length], ['m', r.m.length], ['b', r.b.length], ['', r['-'].length]];
+    let x = 0, out = '';
+    for (const [c, q] of parts) for (let j = 0; j < q; j++, x++) out += `<rect class="${c}" x="${x}" width="${1 - gap}" height="1"/>`;
+    return `<svg class="pips" data-k="p:${k}" data-fx="pop" data-sig="${parts.map(p => p[1]).join('.')}" viewBox="0 0 ${n - gap} 1" width="${Math.min(n * 11 - 2, 72)}" height="6" preserveAspectRatio="none" aria-hidden="true">${out}</svg>`;
+  }
+
+  // Everyone by name, each drawn the way they answered, you first in your lot.
+  // lots: [class, said aloud, members]. A big group folds away past twelve.
+  const CAP = 12;
+  function roster(key, lots, note) {
+    const all = lots.flatMap(g => [...g[2]].sort((a, b) => (b.id === G.me) - (a.id === G.me)).map(m => [g[0], g[1], m]));
+    const open = !!ui.open['r:' + key], show = open || all.length <= CAP ? all : all.slice(0, CAP - 1);
+    return `<ul class="roster">${show.map(([c, said, m]) => {
+      const nt = note ? note(m, c) : '';
+      return `<li class="${c}${m.id === G.me ? ' me' : ''}" data-k="c:${key}:${m.id}" data-sig="${c}/${nt}"><span class="vh">${said}: </span><span class="nm">${m.id === G.me ? 'You' : esc(m.name)}</span>${nt ? `<small>${nt}</small>` : ''}</li>`;
+    }).join('')}${all.length > CAP ? `<li class="more"><button data-act="all" data-key="${key}" aria-expanded="${open}">${open ? 'Less' : `+${all.length - show.length}`}</button></li>` : ''}</ul>`;
+  }
+
+  function week(w, now) {
+    const s = G.state, n = s.members.length, top = L.best(s, [w], now)[0];
+    const rows = openSlots(w, now).map(i => {
+      const r = L.roll(s, w, i), mine = L.answer(s, G.me, w, i), open = !!ui.open[w + ':' + i], k = w + ':' + i;
+      const all = n > 1 && r.f.length === n;
+      const count = all ? `<span class="slot-n all"><span class="live"></span>Everyone's free</span>`
+        : `<span class="slot-n">${pips(r, n, k)}<span><b data-k="n:${k}" data-fx="tick" data-sig="${r.f.length}">${r.f.length}</b> free<span class="vh"> of ${n}${r.m.length ? `, ${r.m.length} maybe` : ''}</span></span></span>`;
+      const who = open ? `<div class="who-box" data-k="w:${k}">${roster(k, [['in', 'Free', r.f], ['maybe', 'Maybe', r.m], ['out', 'Busy', r.b], ['none', 'No answer', r['-']]])}<button class="link" data-act="event" data-w="${w}" data-i="${i}">New event on ${L.slotName(i)}</button></div>` : '';
+      return `<div class="slot">
+        <button class="slot-info" data-act="who" data-w="${w}" data-i="${i}" aria-expanded="${open}"><span class="slot-name">${L.slotName(i)}${DOWN}${!all && top && top.i === i ? `<span class="top-slot">Best</span>` : ''}</span>${count}</button>
+        <div class="slide" data-pos="${pos(ANSWERS, mine.v)}" role="group" aria-label="${L.slotWhen(w, i)}, your answer"><span class="knob"></span>${ANSWERS.map(a => `<button data-act="mark" data-w="${w}" data-i="${i}" data-v="${a[0]}" aria-pressed="${mine.v === a[0]}">${a[1]}</button>`).join('')}</div>
+        ${who}
+      </div>`;
+    }).join('');
+    if (!rows) return '';
+    // The weekend at a glance: a bar a slot, as tall as the share who are free.
+    const sky = n > 1 ? `<span class="sky" aria-hidden="true">${L.SLOTS.map((_, i) => {
+      const past = L.isPast(w, i, now), f = past ? 0 : L.roll(s, w, i).f.length;
+      return `<i class="${past ? 'past' : ''}${i === 1 || i === 3 ? ' gap' : ''}"><b data-k="b:${w}:${i}" data-fx="bar" style="height:${Math.round(f / n * 100)}%"></b></i>`;
+    }).join('')}</span>` : '';
+    return `<section class="section" data-k="s:${w}">
+      <div class="sec-head"><h2>${L.relLabel(w, now)}</h2><span class="sec-side"><span class="muted">${L.rangeLabel(w)}</span>${sky}</span></div>
+      <div class="card">${rows}</div>
+    </section>`;
+  }
+
+  function event(p) {
+    const s = G.state, by = L.member(s, p.by), mine = p.rsvp[G.me] || '', now = new Date();
+    const all = L.planSlots(p), oneDay = new Set(all.map(i => L.SLOTS[i].day)).size === 1;
+    // Someone who can only make part of it has the part beside their name.
+    const some = (m, c) => { const got = L.planPart(p, m.id); return c !== 'out' && c !== 'none' && got.length < all.length ? L.slotsName(got, oneDay) : ''; };
+    const groups = REPLIES.map(r => [r[0], r[1], s.members.filter(m => p.rsvp[m.id] === r[0])]);
+    const sure = ui.confirm === 'scrap:' + p.id;
+    const got = L.planPart(p, G.me);
+    const part = all.length > 1 && (mine === 'in' || mine === 'maybe') ? `<div class="ev-part${all.length > 2 ? ' long' : ''}"><span>You can make</span><div class="seg" role="group" aria-label="The parts you can make">${all.map(i => `<button data-act="part" data-p="${p.id}" data-i="${i}" aria-pressed="${got.includes(i)}">${oneDay ? L.SLOTS[i].part[0].toUpperCase() + L.SLOTS[i].part.slice(1) : L.slotName(i)}</button>`).join('')}</div></div>` : '';
+    const a = L.slotDate(p.w, all[0]), b = L.slotDate(p.w, all[all.length - 1]), span = a.getTime() !== b.getTime();
+    const month = d => d.toLocaleDateString('en-AU', { month: 'short' });
+    const date = `<div class="ev-date${span ? ' wide' : ''}${L.key(a) === L.key(now) ? ' now' : ''}" aria-hidden="true"><b>${a.getDate()}${span ? `–${b.getDate()}` : ''}</b><span>${month(b)}</span></div>`;
+    // The foot of the card: the calendar on the left once you're coming, and
+    // on the right, for whoever called it, taking the event down.
+    const foot = (mine === 'in' || mine === 'maybe' ? `<button class="link quiet" data-act="cal" data-p="${p.id}">Add to calendar</button>` : '')
+      + (p.by === G.me || !by ? `<button class="link quiet ev-del${sure ? ' danger' : ''}" data-act="scrap" data-p="${p.id}">${sure ? 'Delete event?' : 'Delete event'}</button>` : '');
+    return `<article class="card ev" data-k="e:${p.id}">
+      <div class="ev-top">${date}
+        <div><div class="ev-title">${esc(p.text)}</div><div class="ev-when"><span class="vh">${L.planWhen(p)}. </span><span aria-hidden="true">${L.slotsName(all)}</span>${by ? ` · by ${by.id === G.me ? 'you' : esc(by.name)}` : ''}</div></div>
+      </div>
+      <div class="ev-tear"></div>
+      <div class="slide" data-pos="${pos(REPLIES, mine)}" role="group" aria-label="Your answer"><span class="knob"></span>${groups.map(g => `<button data-act="rsvp" data-p="${p.id}" data-v="${g[0]}" aria-pressed="${mine === g[0]}">${g[1]}${g[2].length ? `<small>${g[2].length}</small>` : ''}</button>`).join('')}</div>
+      ${part}
+      ${roster(p.id, [...groups, ['none', 'No answer', s.members.filter(m => !p.rsvp[m.id])]], some)}
+      ${foot ? `<div class="ev-foot">${foot}</div>` : ''}
+    </article>`;
+  }
+
+  function renderSheet(quiet) {
+    const sh = ui.sheet;
+    if (!sh || view !== 'board' && sh.kind !== 'about') { sheetRoot.innerHTML = ''; sheetDrawn = ''; document.body.style.overflow = ''; return; }
+    const html = sh.kind === 'about' ? aboutSheet() : sh.kind === 'event' ? eventSheet(sh) : sh.kind === 'invite' ? inviteSheet(sh) : settingsSheet();
+    if (quiet && html === sheetDrawn) return;
+    sheetDrawn = html;
+    const y = sheetRoot.querySelector('.sheet') ? sheetRoot.querySelector('.sheet').scrollTop : 0;
+    // Whatever is half typed survives the redraw, and so does the cursor.
+    const fieldKey = el => el.form ? el.form.dataset.form + '/' + el.name : '';
+    const typed = {}, at = document.activeElement;
+    sheetRoot.querySelectorAll('form[data-form] input[type=text]').forEach(el => { if (el.value !== el.defaultValue) typed[fieldKey(el)] = el.value; });
+    const focused = at && at.matches && at.matches('input[type=text]') && sheetRoot.contains(at) ? fieldKey(at) : '';
+    const inside = !!at && sheetRoot.contains(at), up = sheetRoot.firstChild ? '' : ' rise';
+    sheetRoot.innerHTML = `<div class="backdrop${up}" data-act="close"></div><div class="sheet${up}${sh.kind === 'about' ? ' page' : ''}" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">${html}</div>`;
+    document.body.style.overflow = 'hidden';
+    sheetRoot.querySelectorAll('form[data-form] input[type=text]').forEach(el => {
+      const k = fieldKey(el);
+      if (k in typed) el.value = typed[k];
+      if (k === focused) el.focus({ preventScroll: true });
+    });
+    sheetRoot.querySelector('.sheet').scrollTop = y;
+    if (quiet && inside && !focused) sheetRoot.querySelector('.sheet').focus({ preventScroll: true });
+  }
+  // Opening a sheet never puts the cursor in a field, so the keyboard stays down.
+  function openSheet(sh) {
+    ui.sheet = sh; renderSheet(); sheetRoot.querySelector('.sheet').focus({ preventScroll: true });
+    if (!(history.state && history.state.sheet)) history.pushState({ sheet: 1 }, '');
+  }
+  function closeSheet() { ui.sheet = null; ui.confirm = null; renderSheet(); if (history.state && history.state.sheet) history.back(); }
+  const sheetHead = (t, shut = 'Done') => `<div class="sheet-head"><h2 id="sheet-title">${t}</h2><button class="link" data-act="close">${shut}</button></div>`;
+
+  // The group's code, large enough to read out across a room.
+  function inviteSheet(sh) {
+    if (sh.fail) return `${sheetHead('Invite')}
+      <div class="sheet-body"><p class="hint">Can't get a code right now.</p><button class="btn wide" data-act="shareLink">Share link</button></div>`;
+    return `${sheetHead('Invite')}
+      <div class="sheet-body">
+        <div ${sh.code ? `role="img" aria-label="Join code ${sh.code.split('').join(' ')}"` : 'aria-busy="true"'}>${cells(sh.code || '').replace(' class="at"', '')}</div>
+        <p class="hint">Works for a week.</p>
+        <button class="btn wide" data-act="shareCode"${sh.code ? '' : ' disabled'}>Share code</button>
+        <div class="invite-foot"><button class="link quiet" data-act="shareLink">Share the link instead</button></div>
+      </div>`;
+  }
+
+  // One place for the version, the policy, the terms and the way to us.
+  let appVersion = '';
+  const getApp = !shell && location.hostname === 'muster.teloone.au' && /Android/.test(navigator.userAgent);
+  // The app says which build it is. The website's copy is stamped with its version when it is published.
+  const WEB_VERSION = '1.4.1';
+  function aboutSheet() {
+    const v = appVersion || (WEB_VERSION.startsWith('__') ? '' : WEB_VERSION);
+    return `<div class="sheet-head back"><button class="back" data-act="close" aria-label="Back"><svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2 2 8l6 6"/></svg></button><h2 id="sheet-title">About</h2></div>
+      <div class="sheet-body">
+        <div class="about-id">
+          <img src="icons/icon-192.png" width="64" height="64" alt="" onerror="this.hidden=true">
+          <p class="about-name">Muster</p>
+          <p class="about-tag">See when everyone's free this weekend.</p>
+          ${v ? `<p class="about-ver">Version ${esc(v)}</p>` : ''}
+        </div>
+        <div class="about-links">
+      <a class="about-mail" href="mailto:support@teloone.au?subject=Muster">support@teloone.au</a>
+      <div class="about-legal"><a href="https://teloone.au/apps/muster/privacy/" rel="noreferrer">Privacy policy</a><i aria-hidden="true"></i><a href="https://teloone.au/apps/muster/terms/" rel="noreferrer">Terms of use</a></div>
+      ${getApp ? `<a href="/app">Get the Android app</a>` : ''}
+    </div>
+        <p class="about-foot">Made in Adelaide by Telo One</p>
+      </div>`;
+  }
+
+  function eventSheet(sh) {
+    const now = new Date(), open = openSlots(sh.w, now);
+    return `${sheetHead('New event', 'Cancel')}
+      <div class="sheet-body"><form data-form="event" autocomplete="off">
+        <label class="field"><span class="field-label">What's on</span><input type="text" name="text" maxlength="80" placeholder="Pub at 7" required enterkeyhint="done"></label>
+        <label class="field"><span class="field-label">Weekend</span><select name="w">${L.weeks(now, WEEKS).map(w => `<option value="${w}"${w === sh.w ? ' selected' : ''}>${L.relLabel(w, now).replace(' weekend', ' week')}, ${L.rangeLabel(w)}</option>`).join('')}</select></label>
+        <div class="field"><span class="field-label">When</span><div class="seg five" role="group" aria-label="When, one or more">${L.SLOTS.map((sl, i) => `<button type="button" data-act="slot" data-i="${i}" aria-pressed="${sh.sel.includes(i)}"${open.includes(i) ? '' : ' disabled'}>${sl.day}<br>${sl.part}</button>`).join('')}</div></div>
+        <button class="btn wide">Post</button>
+      </form></div>`;
+  }
+
+  function settingsSheet() {
+    const s = G.state, me = L.member(s, G.me);
+    const list = s.members.map(m => {
+      const sure = ui.confirm === 'remove:' + m.id;
+      return `<div class="person"><span>${esc(m.name)}${m.id === G.me ? ' <em>you</em>' : ''}</span>${m.id === G.me ? '' : `<button class="link quiet" data-act="remove" data-id="${m.id}">${sure ? 'Tap again to remove' : 'Remove'}</button>`}</div>`;
+    }).join('');
+    return `${sheetHead('You and the group')}
+      <div class="sheet-body">
+        <form data-form="rename-me" class="field" style="gap:6px" autocomplete="off"><label class="field-label" for="f-me">Your name</label><div class="pair"><input id="f-me" type="text" name="name" maxlength="24" value="${esc(me.name)}" required autocapitalize="words" autocorrect="off" enterkeyhint="done"><button class="btn ghost">Save</button></div></form>
+        <form data-form="rename-group" class="field" style="gap:6px" autocomplete="off"><label class="field-label" for="f-group">Group name</label><div class="pair"><input id="f-group" type="text" name="name" maxlength="40" value="${esc(s.group.name)}" required autocapitalize="words" enterkeyhint="done"><button class="btn ghost">Save</button></div></form>
+        <div class="field"><span class="field-label">People</span><div class="people">${list}</div></div>
+        ${shell ? `<div class="field"><span class="field-label">Remind me to answer</span><div class="people"><div class="person"><span>Thursday, 6 pm</span><button class="link" data-act="remind" aria-pressed="${remindOn()}">${remindOn() ? 'Turn off' : remindBlocked ? 'Open Settings' : 'Turn on'}</button></div></div></div>` : ''}
+        <div class="foot-links"><button class="link danger" data-act="leave">${ui.confirm === 'leave' ? 'Tap again to leave' : 'Leave this group'}</button><button class="link danger" data-act="wipe">${ui.confirm === 'wipe' ? 'Tap again to delete for everyone' : 'Delete this group'}</button>${shell ? `<a class="link quiet" href="mailto:support@teloone.au?subject=${encodeURIComponent('Report a Muster group')}&amp;body=${encodeURIComponent(`${SITE}/g/${G.id}\n\nWhat's wrong: `)}">Report this group</a>` : ''}</div>
+      </div>`;
+  }
+
+
+  // ---- Doing things ----
+
+  let toastTimer;
+  function toast(t) { toastEl.textContent = t; toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200); }
+
+  // Destructive buttons want a second tap; the first one arms them for a few seconds.
+  let confirmTimer;
+  function sure(key) {
+    if (ui.confirm === key) { ui.confirm = null; clearTimeout(confirmTimer); return true; }
+    ui.confirm = key;
+    clearTimeout(confirmTimer);
+    confirmTimer = setTimeout(() => {
+      ui.confirm = null; render();
+      // Drawing the sheet again would take the keyboard away mid-word.
+      const at = document.activeElement;
+      if (!(at && sheetRoot.contains(at) && /^(INPUT|TEXTAREA|SELECT)$/.test(at.tagName))) renderSheet();
+    }, 4000);
+    return false;
+  }
+
+  // Hand a message and the group's link to the share sheet, or copy them.
+  async function send(text, url = `${SITE}/g/${G.id}`) {
+    if (shell) return tell({ type: 'share', title: G.state.group.name, text: `${text}\n${url}` });
+    const copy = async () => { try { await navigator.clipboard.writeText(url); toast('Link copied'); } catch (x) { toast("Couldn't copy the link."); } };
+    if (!navigator.share) return copy();
+    try { await navigator.share({ title: G.state.group.name, text, url }); } catch (e) { if (e && e.name !== 'AbortError') await copy(); }
+  }
+
+  const acts = {
+    // Your answer for a slot. Tapping the one you gave takes it back.
+    mark(d) {
+      const i = +d.i, said = ((G.state.marks[G.me] || {})[d.w] || L.BLANK)[i];
+      if (!(d.set && said === d.v)) push({ t: 'mark', m: G.me, w: d.w, i, v: said === d.v ? '-' : d.v });
+      // A drag has ticked on its way; a tap gets its own.
+      if (shell && !d.set) tell({ type: 'haptic', kind: 'tick' });
+      render();
+      const el = app.querySelector(`[data-act="mark"][data-w="${d.w}"][data-i="${i}"][data-v="${d.v}"]`);
+      if (el) { el.focus({ preventScroll: true }); glide(el.parentNode, d.from != null ? d.from : pos(ANSWERS, said)); }
+    },
+    who(d) {
+      const k = d.w + ':' + d.i;
+      ui.open[k] = !ui.open[k]; render();
+      const el = app.querySelector(`[data-act="who"][data-w="${d.w}"][data-i="${d.i}"]`); if (el) el.focus({ preventScroll: true });
+    },
+    more() { ui.more = true; render(); },
+    // A big group's names, unfolded and folded away again.
+    all(d) {
+      const k = 'r:' + d.key; ui.open[k] = !ui.open[k]; render();
+      const el = app.querySelector(`[data-act="all"][data-key="${d.key}"]`); if (el) el.focus({ preventScroll: true });
+    },
+    // From the top it starts on this weekend; from a slot, on that slot.
+    event(d) {
+      const now = new Date(), w = d.w || L.weeks(now, 2).find(x => openSlots(x, now).length);
+      openSheet({ kind: 'event', w, sel: [d.i != null ? +d.i : openSlots(w, now)[0]], soft: d.i == null });
+    },
+    // Tapping a slot adds it to the event or takes it off; one always stays.
+    slot(d) {
+      const sh = ui.sheet, i = +d.i, on = sh.sel.includes(i);
+      // The slot we guessed gives way to the first one picked.
+      if (sh.soft) { sh.soft = false; if (!on) sh.sel = []; }
+      if (on && sh.sel.length === 1) return;
+      sh.sel = on ? sh.sel.filter(x => x !== i) : [...sh.sel, i].sort((a, b) => a - b);
+      renderSheet();
+      const el = sheetRoot.querySelector(`[data-act="slot"][data-i="${d.i}"]`); if (el) el.focus({ preventScroll: true });
+    },
+    // Which parts of a longer event you can make.
+    part(d) {
+      const p = G.state.plans.find(x => x.id === d.p), i = +d.i; if (!p || !p.rsvp[G.me]) return;
+      const all = L.planSlots(p), got = L.planPart(p, G.me), on = got.includes(i);
+      if (on && got.length === 1) return;
+      const next = on ? got.filter(x => x !== i) : [...got, i];
+      push({ t: 'rsvp', p: p.id, m: G.me, v: p.rsvp[G.me], s: next.length === all.length ? 0 : L.maskOf(next) });
+      if (shell) tell({ type: 'haptic', kind: 'tick' });
+      render();
+      const el = app.querySelector(`[data-act="part"][data-p="${d.p}"][data-i="${i}"]`); if (el) el.focus({ preventScroll: true });
+    },
+    rsvp(d) {
+      const p = G.state.plans.find(x => x.id === d.p); if (!p) return;
+      const said = p.rsvp[G.me] || '';
+      if (!(d.set && said === d.v)) push({ t: 'rsvp', p: d.p, m: G.me, v: said === d.v ? '' : d.v, s: (p.part && p.part[G.me]) || 0 });
+      if (shell && !d.set) tell({ type: 'haptic', kind: 'tick' });
+      render();
+      const el = app.querySelector(`[data-act="rsvp"][data-p="${d.p}"][data-v="${d.v}"]`);
+      if (el) { el.focus({ preventScroll: true }); glide(el.parentNode, d.from != null ? d.from : pos(REPLIES, said)); }
+    },
+    // The phone's own calendar sheet in the apps; a calendar file on the website.
+    cal(d) {
+      const p = G.state.plans.find(x => x.id === d.p); if (!p) return;
+      const t = L.planTimes(p), notes = `Planned with ${G.state.group.name} on Muster`;
+      if (shell) return tell({ type: 'calendar', title: p.text, start: t.start.getTime(), end: t.end.getTime(), notes });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([L.planIcs(p, notes, new Date())], { type: 'text/calendar' }));
+      a.download = 'muster-event.ics';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    },
+    scrap(d) { if (sure('scrap:' + d.p)) push({ t: 'plan', id: d.p, deleted: true }); render(); },
+    invite() {
+      // A group started offline has no link to open until the server has it.
+      if (!G.state.group.version) { sync(); return toast("Group not sent yet. Invite once you're online."); }
+      const g = G;
+      openSheet({ kind: 'invite', code: g.invite || '' });
+      // Asking gives the code another week, so it's asked for each time.
+      fetch(`${API}/api/g/${g.id}/code`, { method: 'POST' }).then(res => res.ok ? res.json() : null).catch(() => null).then(got => {
+        if (got && got.code) g.invite = got.code;
+        if (g !== G || !ui.sheet || ui.sheet.kind !== 'invite') return;
+        if (g.invite) ui.sheet.code = g.invite; else ui.sheet.fail = true;
+        renderSheet(true);
+      });
+    },
+    shareCode() { if (ui.sheet && ui.sheet.code) send(`Join ${G.state.group.name} on Muster with the code ${ui.sheet.code}`, `${SITE}/j/${ui.sheet.code}`); },
+    shareLink() { send(`${G.state.group.name}: mark when you're free`); },
+    settings() { openSheet({ kind: 'settings' }); },
+    about() { openSheet({ kind: 'about' }); },
+    close() { closeSheet(); },
+    remove(d) { if (sure('remove:' + d.id)) push({ t: 'member', id: d.id, removed: true }); render(); renderSheet(); },
+    leave() {
+      if (!sure('leave')) return renderSheet();
+      const g = G;
+      g.left = true;
+      const ops = [...g.queue, { t: 'member', id: g.me, removed: true }];
+      (async () => {
+        for (let k = 0; k < ops.length; k += SLICE) await fetch(`${API}/api/g/${g.id}/ops`, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ops: ops.slice(k, k + SLICE) }) });
+      })().catch(() => {});
+      forget(g.id);
+      go('/');
+    },
+    wipe() {
+      if (!sure('wipe')) return renderSheet();
+      const g = G;
+      // A group the server never had is only on this phone.
+      const sent = g.state.group.version ? fetch(`${API}/api/g/${g.id}/delete`, { method: 'POST' }).then(res => res.ok || res.status === 404) : Promise.resolve(true);
+      sent.catch(() => false).then(ok => {
+        if (!ok) { toast("Couldn't delete. Try again when you're online."); if (g === G) { ui.confirm = null; renderSheet(); } return; }
+        g.left = true; g.queue = [];
+        forget(g.id);
+        if (g === G) go('/');
+      });
+    },
+    claim(d) { G.me = d.id; remember(G); render(); },
+    remind() {
+      if (!remindOn()) return tell({ type: remindBlocked ? 'openSettings' : 'askNotifications' });
+      ls.set('muster.remind', false); plan(); renderSheet();
+    },
+    retry() { G.failed = false; render(); if (G.code) seek(); else sync(); },
+    // Starting a group needs your name first.
+    step(d) {
+      if (d.s === 'create' && !ls.get('muster.name', '')) { after = 'create'; return toStep('name'); }
+      toStep(d.s);
+    },
+    back() { history.back(); },
+  };
+
+
+  const forms = {
+    name(f) {
+      const mine = clean(f.me.value, 24);
+      if (!mine) return;
+      ls.set('muster.name', mine);
+      const next = after || 'choose'; after = '';
+      toStep(next);
+    },
+    // Four letters. A pasted group link still works.
+    async link(f) {
+      const raw = f.link.value.trim(), m = raw.match(/(?:^|\/g\/)([A-Za-z0-9_-]{22})\/?(?:[?#].*)?$/);
+      if (m) return go('/g/' + m[1]);
+      const code = raw.toUpperCase(), u = ui;
+      if (!/^[A-Z]{4}$/.test(code)) { f.link.focus(); return; }
+      if (u.seeking) return;
+      u.seeking = true;
+      const r = await find(code);
+      u.seeking = false;
+      if (u !== ui || step() !== 'link') return;
+      if (r.id) return go('/g/' + r.id);
+      ui.bad = r.err; ui.code = code; render();
+      const el = app.querySelector('input[name=link]'); if (el) el.focus();
+    },
+    create(f) {
+      const name = clean(f.group.value, 40), mine = clean(ls.get('muster.name', ''), 24);
+      if (!name || !mine) return;
+      const id = rid(), me = rid();
+      const g = { id, me, state: { group: { id, name, version: 0 }, members: [], marks: {}, plans: [] }, queue: [] };
+      [{ t: 'group', name }, { t: 'member', id: me, name: mine }].forEach(op => { L.applyOp(g.state, op); g.queue.push(op); });
+      persist(g); remember(g);
+      go('/g/' + id);
+    },
+    join(f) {
+      const mine = clean(f.me.value, 24);
+      if (!mine) return;
+      ls.set('muster.name', mine);
+      const twin = G.state.members.find(m => m.name.toLowerCase() === mine.toLowerCase());
+      if (twin && ui.dup !== mine.toLowerCase()) { ui.dup = mine.toLowerCase(); ui.dupName = twin.name; return render(); }
+      G.me = rid();
+      push({ t: 'member', id: G.me, name: mine });
+      remember(G); render();
+    },
+    'rename-me'(f) {
+      const name = clean(f.name.value, 24);
+      if (!name) return;
+      if (name && name !== L.member(G.state, G.me).name) { push({ t: 'member', id: G.me, name }); ls.set('muster.name', name); render(); }
+      f.name.blur(); renderSheet(); toast('Saved');
+    },
+    'rename-group'(f) {
+      const name = clean(f.name.value, 40);
+      if (!name) return;
+      if (name && name !== G.state.group.name) { push({ t: 'group', name }); remember(G); render(); }
+      f.name.blur(); renderSheet(); toast('Saved');
+    },
+    event(f) {
+      const text = clean(f.text.value, 80), sh = ui.sheet;
+      if (!text || !sh.sel.length) return;
+      const id = rid();
+      push({ t: 'plan', id, w: sh.w, i: sh.sel[0], text, by: G.me, ...(sh.sel.length > 1 ? { s: L.maskOf(sh.sel) } : {}) }, { t: 'rsvp', p: id, m: G.me, v: 'in' });
+      closeSheet(); render();
+    },
+  };
+
+  // The page is redrawn after every answer, so the new knob starts where the
+  // old one was and slides from there.
+  function glide(el, from) {
+    const p = from === '-' ? 1 : +from;
+    el.classList.add('still'); el.style.setProperty('--p', p);
+    el.offsetWidth;
+    el.classList.remove('still'); el.style.removeProperty('--p');
+  }
+
+  // Dragging the knob. A plain tap falls through to the click below.
+  let drag = null, dragged = 0;
+  document.addEventListener('pointerdown', e => {
+    const el = e.target.closest('.slide');
+    if (!el || (e.pointerType === 'mouse' && e.button)) return;
+    const r = el.getBoundingClientRect();
+    drag = { el, id: e.pointerId, x: e.clientX, y: e.clientY, left: r.left + 3, step: (r.width - 6) / 3, on: false, was: el.dataset.pos, p: 1 };
+  });
+  document.addEventListener('pointermove', e => {
+    const g = drag; if (!g || e.pointerId !== g.id) return;
+    if (!g.on) {
+      const dx = Math.abs(e.clientX - g.x), dy = Math.abs(e.clientY - g.y);
+      if (dx < 7 || dx < dy) return;
+      g.on = true; g.el.classList.add('drag');
+      try { g.el.setPointerCapture(g.id); } catch (_) {}
+    }
+    g.p = Math.max(0, Math.min(2, (e.clientX - g.left) / g.step - .5));
+    const k = String(Math.round(g.p));
+    if (k !== g.el.dataset.pos) { g.el.dataset.pos = k; if (shell) tell({ type: 'haptic', kind: 'tick' }); else if (navigator.vibrate) navigator.vibrate(6); }
+    g.el.style.setProperty('--p', g.p);
+  });
+  const drop = e => {
+    const g = drag; if (!g || e.pointerId !== g.id) return;
+    drag = null;
+    if (!g.on) return;
+    dragged = Date.now();
+    const b = e.type === 'pointerup' && g.el.querySelectorAll('button')[Math.round(g.p)];
+    if (b && document.contains(b)) return acts[b.dataset.act]({ ...b.dataset, set: '1', from: g.p });
+    g.el.classList.remove('drag'); g.el.style.removeProperty('--p'); g.el.dataset.pos = g.was;
+  };
+  document.addEventListener('pointerup', drop);
+  document.addEventListener('pointercancel', drop);
+
+  document.addEventListener('click', e => {
+    if (Date.now() - dragged < 350 && e.target.closest('.slide')) return;
+    const nav = e.target.closest('a[data-nav]');
+    if (nav && !e.metaKey && !e.ctrlKey && !e.shiftKey) { e.preventDefault(); return go(nav.getAttribute('href')); }
+    const el = e.target.closest('[data-act]');
+    if (!el || el.disabled) return;
+    const act = acts[el.dataset.act];
+    if (act) act(el.dataset);
+  });
+  document.addEventListener('submit', e => {
+    const f = e.target.closest('form[data-form]');
+    if (!f) return;
+    e.preventDefault();
+    forms[f.dataset.form](f.elements);
+  });
+  // The code field takes letters only, in capitals, and joins on the fourth.
+  document.addEventListener('input', e => {
+    const el = e.target;
+    if (!el.matches || !el.matches('.code-in input')) return;
+    const raw = el.value;
+    if (/\/g\/[A-Za-z0-9_-]{22}/.test(raw)) return forms.link(el.form.elements);
+    const j = raw.match(/\/j\/([A-Za-z]{4})/);
+    const v = (j ? j[1] : raw.replace(/[^A-Za-z]/g, '')).toUpperCase().slice(0, 4);
+    el.value = v;
+    ui.code = v; ui.bad = false; drawn = null;
+    const box = el.parentNode.querySelector('.cells'); if (box) box.outerHTML = cells(v);
+    const bad = el.form.querySelector('.bad'); if (bad) bad.remove();
+    if (v.length === 4) forms.link(el.form.elements);
+  });
+  // Picking another weekend for an event: its past slots can't be chosen.
+  document.addEventListener('change', e => {
+    if (!e.target.matches('select[name=w]') || !ui.sheet) return;
+    ui.sheet.w = e.target.value;
+    const open = openSlots(ui.sheet.w);
+    ui.sheet.sel = ui.sheet.sel.filter(i => open.includes(i));
+    if (!ui.sheet.sel.length) ui.sheet.sel = [open[0]];
+    renderSheet();
+    const el = sheetRoot.querySelector('select[name=w]'); if (el) el.focus({ preventScroll: true });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && ui.sheet) closeSheet();
+    // On a phone the keyboard's done key puts the keyboard away. Only Post posts,
+    // once the day has been looked at.
+    if (e.key === 'Enter' && !e.isComposing && (shell || matchMedia('(pointer: coarse)').matches) && e.target.matches && e.target.matches('form[data-form="event"] input[name=text]')) { e.preventDefault(); e.target.blur(); }
+  });
+  if (shell) {
+    shell.onmessage = e => {
+      let m; try { m = JSON.parse(e.data); } catch (x) { return; }
+      if (m.type === 'info') {
+        if (typeof m.version === 'string') appVersion = m.version.slice(0, 20);
+        // Notifications switched off in Settings: the reminder is off too.
+        if (!m.notifications && remindOn()) ls.set('muster.remind', false);
+        // Allowed in Settings after asking here: the reminder they wanted goes on.
+        if (m.notifications && remindBlocked) { remindBlocked = false; ls.set('muster.remind', true); }
+        plan(); renderSheet();
+      }
+      if (m.type === 'notifications') {
+        if (m.allowed) { ls.set('muster.remind', true); plan(); }
+        else { remindBlocked = true; toast('Notifications are off for Muster in Settings.'); }
+        renderSheet();
+      }
+    };
+    tell({ type: 'hello' });
+    // Back from Settings, or from anywhere: ask again whether notifications are allowed.
+    window.musterAsk = () => tell({ type: 'hello' });
+  }
+
+  route();
+})();
+</script>
+</body>
+</html>

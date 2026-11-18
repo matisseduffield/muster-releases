@@ -1,0 +1,15 @@
+{
+  "versionCode": 10802,
+  "versionName": "1.8.2",
+  "apk": "https://raw.githubusercontent.com/matisseduffield/muster-releases/main/Muster-v1.8.2.apk",
+  "size": 327246,
+  "sha256": "3891afc01de48bd30af48c446c6c62f574a3cde7e99979ee868015e19fd468c7",
+  "publishedAt": "2026-11-18T06:38:21Z",
+  "notes": [
+    "Your Free, Maybe and Busy answers now sit above Events",
+    "Leaving a group with no signal now tells you, and keeps the group until it can leave properly",
+    "Back after starting or joining a group goes to your groups, not the form",
+    "A group someone deleted now says so",
+    "Fixed cramped labels on whole-weekend events and the month on events that cross months"
+  ]
+}
